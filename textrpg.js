@@ -151,7 +151,7 @@ for (let i = 0; i < list_rooms.length; i++) {
 console.log(list_rooms);
 
 //room update function
-function updateCharacterPosition(character, rooms) {
+function updateCharacterPosition(character, rooms) { // need to call lthis function every time the character moves
   for (let i = 0; i < rooms.length; i++) {
     rooms[i].character_exists_here = rooms[i].room_id === character.room;
     if (rooms[i].character_exists_here) {
@@ -173,3 +173,7 @@ console.log(list_rooms);
 new_char.move("n", new_map);
 updateCharacterPosition(new_char, list_rooms);
 console.log(list_rooms);
+
+//it is still possible to ask the character to move in a direction that is not possible
+//need to sanitize input so that the character does not move into a wall
+
