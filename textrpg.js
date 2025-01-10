@@ -34,8 +34,8 @@ class Room {
    * @param {Array} directions
    * @param {number} id
    */
-  constructor(accessible, directions, id) {
-    this.accessible = accessible;
+  constructor(accessiblity, directions, id) {
+    this.accessible = accessiblity;
     this.directions = [
       directions[0],
       directions[1],
@@ -64,8 +64,23 @@ class Room {
     return this.has_character;
   }
 
+  /**
+   * @param {Array} input_directions
+   */
+
   set possible_directions(input_directions) {
     this.directions = input_directions;
+  }
+
+  get room_is_accessible() {
+    return this.accessible;
+  }
+
+  /**
+   * @param {boolean} accessibility
+   */
+  set room_accessible(accessibility) {
+    this.accessible = accessibility;
   }
 }
 
@@ -75,6 +90,7 @@ class Character {
   /**
    * @param {string} name
    * @param {boolean} can_move
+   * @param {number} starting_room
    */
   constructor(name, can_move, starting_room) {
     this.name = name;
@@ -83,25 +99,59 @@ class Character {
   }
 
   /**
+   * @param {number} room
+   */
+
+  set room_num(room) {
+    this.room = room;
+  }
+
+  /**
+   * @returns {number}
+   */
+
+  get room_num() {
+    return this.room;
+  }
+  /**
    *
    * @param {string} direction
    * @param {Map} map
+   * @param {Array} rooms
+   *
    */
-  move(direction, map) {
+  move(direction, map, rooms) {
     // Method to move the character to a new room
     // Logic for moving the character
-    if (direction === "n") {
-      this.room -= map.width; // subtract the width of the map + 1 to get the room ID of the room above
-    } else if (direction === "e") {
-      this.room += 1; // add one to the room ID to get the room to the right
-    } else if (direction === "s") {
-      this.room += map.width; // add the width of the map + 1 to get the room ID of the room below
-    } else if (direction === "w") {
-      this.room -= 1; // subtract one from the room ID to get the room to the left
+    if (
+      direction === "n" &&
+      this.room_num - map.width >= 0 &&
+      rooms[this.room_num - map.width].room_is_accessible
+    ) {
+      this.room_num -= map.width;
+    } else if (
+      direction == "s" &&
+      this.room_num + map.width < rooms.length &&
+      rooms[this.room_num + map.width].room_is_accessible
+    ) {
+      this.room_num += map.width;
+    } else if (
+      direction == "e" &&
+      this.room_num + 1 < rooms.length &&
+      rooms[this.room_num + 1].room_is_accessible
+    ) {
+      this.room_num += 1;
+    } else if (
+      direction == "w" &&
+      this.room_num - 1 >= 0 &&
+      rooms[this.room_num - 1].room_is_accessible
+    ) {
+      this.room_num -= 1;
+    } else {
+      console.log("You cannot move in that direction");
     }
   }
 }
-
 //create new map
 //create multiple base sets of rooms
 //this is where we generate the game and the map and the rooms as well as the player
@@ -144,36 +194,34 @@ for (let i = 0; i < list_rooms.length; i++) {
     new_map
   );
 }
-
+function updateCharacterPosition(character, rooms) {
+  // need to call lthis function every time the character moves
+  for (let i = 0; i < rooms.length; i++) {
+    rooms[i].character_exists_here = rooms[i].room_id === character.room;
+  }
+}
 // console.log(new_map);
-
+updateCharacterPosition(new_char, list_rooms);
 // //list of rooms that can be accessed
 console.log(list_rooms);
 
 //room update function
-function updateCharacterPosition(character, rooms) { // need to call lthis function every time the character moves
-  for (let i = 0; i < rooms.length; i++) {
-    rooms[i].character_exists_here = rooms[i].room_id === character.room;
-    if (rooms[i].character_exists_here) {
-      console.log(rooms[i].character_exists);
-      console.log(character.room);
-    }
-  }
-}
 
 updateCharacterPosition(new_char, list_rooms);
 console.log(list_rooms);
+new_char.move("n", new_map, list_rooms);
 
-new_char.move("s", new_map);
+new_char.move("s", new_map, list_rooms);
 updateCharacterPosition(new_char, list_rooms);
 console.log(list_rooms);
-new_char.move("e", new_map);
+new_char.move("e", new_map, list_rooms);
 updateCharacterPosition(new_char, list_rooms);
 console.log(list_rooms);
-new_char.move("n", new_map);
+new_char.move("n", new_map, list_rooms);
 updateCharacterPosition(new_char, list_rooms);
 console.log(list_rooms);
-
+new_char.move("n", new_map, list_rooms);
+updateCharacterPosition(new_char, list_rooms);
+console.log(list_rooms);
 //it is still possible to ask the character to move in a direction that is not possible
 //need to sanitize input so that the character does not move into a wall
-
